@@ -4,11 +4,11 @@
 	"scripts": [
 		{
 			"id": 96201,
-			"name": "Ranobes",
+			"name": "(Ranobes)",
 			"fileName": "Ranobes",
 			"imageURL": "https://github.com/bigrand/shosetsu-extensions/raw/master/icons/ranobes.png",
 			"lang": "en",
-			"ver": "1.0.0",
+			"ver": "1.0.2",
 			"libVer": "1.0.0",
 			"md5": "8a7e8285f606f0a1925c00002642e406",
 			"type": "LuaScript"

@@ -1,4 +1,4 @@
--- {"id":96201,"ver":"1.0.0","libVer":"1.0.0","author":"bigrand","dep":["dkjson"]}
+-- {"id":96201,"ver":"1.0.2","libVer":"1.0.0","author":"bigrand","dep":["dkjson"]}
 
 local baseURL = "https://ranobes.top"
 local imageURL = "https://github.com/bigrand/shosetsu-extensions/raw/master/icons/ranobes.png"
@@ -63,17 +63,6 @@ end
 local function randomizedDelay()
 	---@diagnostic disable-next-line: undefined-global
 	delay(math.random(4000, 6000))
-end
-
-local function mapNotNull(o, f)
-    local result = {}
-    for i, v in ipairs(o) do
-        local mapped = f(v)
-        if mapped ~= nil then
-            table.insert(result, mapped)
-        end
-    end
-    return result
 end
 
 local function fetchSafely(url, saveChapters)
