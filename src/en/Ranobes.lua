@@ -268,7 +268,7 @@ local function parseNovel(novelURL, loadChapters)
 				chapters = concatLists(chapters, nextChapters)
 				counterData.fetchedCount  = counterData.fetchedCount  + 1
 				-- prettyPrint("CHAPTERS SAVED!", "SAVED PAGE COUNTER: " .. counterData.fetchedCount)
-				-- randomizedDelay()
+				randomizedDelay()
 			else
 				-- prettyPrint("UPDATE FAILED!", "Some chapters have been saved but some are remaining!" .. "\nSAVED PAGE COUNTER: " .. counterData.fetchedCount)
 				NovelInfo:setChapters(AsList(chapters))
