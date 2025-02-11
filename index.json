@@ -1,0 +1,16 @@
+
+{
+	"libraries": [],
+	"scripts": [
+		{
+			"id": 96201,
+			"name": "Ranobes",
+			"fileName": "Ranobes",
+			"imageURL": "https://github.com/bigrand/shosetsu-extensions/raw/master/icons/ranobes.png",
+			"lang": "en",
+			"ver": "1.0.0",
+			"libVer": "1.0.0",
+			"type": "LuaScript"
+		}
+	]
+}

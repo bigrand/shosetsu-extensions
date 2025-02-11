@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Parser (Old Parser)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>String Text Parser</h1>
+    <textarea id="inputText" placeholder="Enter your text here..."></textarea><br>
+    <button onclick="processText()">Parse Text</button>
+    <button onclick="window.location.href='parserHTML.html'">HTML Parser</button>
+
+    <h2>Output:</h2>
+    <pre id="outputText"></pre>
+
+    <script>
+        function parseDescription(text) {
+            text = text.replace(/\r\n?/g, "\n");
+
+            text = text
+                .split("\n")
+                .map(line => line.trim())
+                .join("\n");
+            
+            text = text.replace(/[ \t]+/g, " ");
+            text = text.replace(/^(?:[*\-!]{3,})\s*$/gm, "$&\n\n");
+            text = text.replace(/([*\-!]{3,})(?=\s+\S)/g, "$1\n\n");
+            text = text.replace(/([”"])\s+(?=[“"])/g, "$1\n");
+            text = text.replace(/([.!?])(\s+)(?![”"])/g, "$1\n\n");
+
+            text = text.replace(/(\S:)\s+/g, "$1\n")
+                        .replace(/\s*-\s+/g, "\n- ")
+                        .replace(/(\S)(\n)(-)/g, "$1$2$3")
+                        .replace(/:\n-/g, ":\n-");
+
+            text = text.replace(/\n{3,}/g, "\n\n");
+            text = text.replace(/【/g, "[").replace(/】/g, "]");
+
+            return text;
+        }
+
+        function processText() {
+            const inputText = document.getElementById("inputText").value;
+            const parsedText = parseDescription(inputText);
+            document.getElementById("outputText").textContent = parsedText;
+        }
+    </script>
+</body>
+</html>

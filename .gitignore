@@ -1,0 +1,15 @@
+.idea
+*.iml
+*/test/*
+*/target/*
+target/*
+personal
+.gradle
+out/*
+gradlew
+gradlew.bat
+gradle
+extension-tester.jar
+_doc.lua
+doc.js
+node_modules/
