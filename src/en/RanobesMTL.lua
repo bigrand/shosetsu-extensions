@@ -277,27 +277,3 @@ return {
 	parseNovel = parseNovel,
 	search = search,
 }
-
-
---[[ 
-Memoria:
-      - Numeros de capitulos ya encontrados - LISTO
-      - Patrones ya usados
-      - Queries de busqueda ya usadas - LISTO
-
-Cambiar de numero de string (hacer target a otros rangos):
-      - Si se obtiene más de 5 veces seguidas <=2 capitulos, cambiar de rango o basado en el ultimo capitulo      
-      encontrado detectar en que rango esta e intentar crear una nueva query que maximice ese rango
-
-Cambiar de patron:
-      - Si todos los rangos faltantes posibles han sidos buscados, cambia al siguiente
-      - Si se obtiene más de 5 veces seguidas 0 capitulos
-
-
-TODO:
-- Crear algoritmo que crea, modifique y elimine rangos como acorde - LISTO
-- Hacer tracking de patrones ya usado
-- Crear algoritmo que verifique si se debe cambiar de patrón:
-      - Rangos y patrones ya vistos
-- Permitir que si los patrones que se encontraron, no encuentra el capitulo correcto. Intentar targetear los rangos pero sin identificar, y/o usar letras (noti, illu, etc.)
- ]]
