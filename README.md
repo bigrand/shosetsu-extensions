@@ -16,10 +16,10 @@ Any help is appreciated! Bug reports are welcome.
 Add the repository using this URL:  
 `https://raw.githubusercontent.com/bigrand/shosetsu-extensions/master/`
 
-For help with adding repositories, see the [Shosetsu guide](https://shosetsu.app/help/guides/repositories/#add-remove-repositories).
+For help with adding repositories, see the [Shosetsu guide](https://shosetsu.app/help/guides/repositories.html#add--remove-repositories).
 
 ## Available Extensions
 - [ranobes.top](https://ranobes.top/)
     - There are two extensions: (Ranobes) and Ranobes (MTL).
       - Ranobes has all content except MTL chapters.  
-      - Ranobes (MTL) only includes MTL chapters.  
+      - Ranobes (MTL) only includes MTL novels.  
