@@ -5,12 +5,12 @@ Extra extensions and libraries for Shosetsu.
 Any help is appreciated! Bug reports are welcome.
 
 ## Planned Features
-- Filters and additional listings
-- Ranobes Library (Russian and MTL support)
-- Additional extensions (Hopefully, ReaperScans and MVLEMPYR)
-- Optimizations and bypasses
-- Pull request to the Shosetsu Universe Repository
-- Better library documentation
+- [ ] Filters and additional listings  
+- [ ] Ranobes.com (Russian)
+- [x] Ranobes MTL 
+- [ ] Additional extensions (ReaperScans and Spanish sources)  
+- [ ] Optimizations and bypasses  
+- [ ] Pull request to the Shosetsu Universe Repository  
 
 ## Adding the Repository to Shosetsu
 Add the repository using this URL:  
@@ -20,6 +20,3 @@ For help with adding repositories, see the [Shosetsu guide](https://shosetsu.app
 
 ## Available Extensions
 - [ranobes.top](https://ranobes.top/)
-
-## Available Libraries
-- parseUtils: A collection of functions for parsing and formatting plain text and HTML. (Not enabled on index.json)
