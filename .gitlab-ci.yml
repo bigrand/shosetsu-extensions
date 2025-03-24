@@ -1,0 +1,66 @@
+# This file is a template, and might need editing before it works on your project.
+# You can copy and paste this template into a new `.gitlab-ci.yml` file.
+# You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
+#
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Bash.gitlab-ci.yml
+
+# See https://docs.gitlab.com/ee/ci/yaml/index.html for all available options
+
+# you can delete this line if you're not using Docker
+image: openjdk:11
+
+stages:
+  - validate
+  - test
+
+before_script:
+  - export BIN=bin/
+  - export FILES=`git diff-tree --no-commit-id --name-only -r $CI_COMMIT_SHA | grep .lua | tr -d '\012\015'`
+# TODO Figure out how to select extension
+
+download:
+    stage: .pre
+    script: 
+        - wget -q https://cdn.shosetsu.app/extension-tester/v1.1.0/extension-tester.jar -P $BIN/
+    cache:
+      key: "$CI_COMMIT_REF_NAME"
+      policy: push
+      paths:
+        - bin
+
+index:
+    stage: validate
+    script:
+        - java -jar $BIN/extension-tester.jar --ci --validate-index
+    cache:
+      key: "$CI_COMMIT_REF_NAME"
+      policy: pull
+      paths:
+        - bin
+
+.metadata:
+    stage: validate
+    script:
+        - java -jar $BIN/extension-tester.jar --ci --validate-metadata $FILES
+    cache:
+      key: "$CI_COMMIT_REF_NAME"
+      policy: pull
+      paths:
+        - bin
+    rules:
+      - if: $FILES != ""
+
+.test:
+    stage: test
+    script:
+        - java -jar $BIN/extension-tester.jar --ci $FILES
+    cache:
+      key: "$CI_COMMIT_REF_NAME"
+      policy: pull
+      paths:
+        - bin
+    rules:
+      - if: $FILES != ""
