@@ -14,6 +14,9 @@ Any help is appreciated! Bug reports are welcome.
 
 ## Adding the Repository to Shosetsu
 Add the repository using this URL:  
+`https://bigrand.github.io/shosetsu-extensions/master/`
+
+Alternatively, you can also use this one:
 `https://raw.githubusercontent.com/bigrand/shosetsu-extensions/master/`
 
 For help with adding repositories, see the [Shosetsu guide](https://shosetsu.app/help/guides/repositories.html#add--remove-repositories).
