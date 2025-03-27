@@ -19,21 +19,13 @@ local function prettyPrint(label, value)
     print(divider .. "\n")
 end
 
-local function concatTables(list1, list2)
-    for i = 1, #list2 do
-		if not list1[list2[i]] then
-			table.insert(list1, list2[i])
-		end
-    end
-    return list1
-end
-
 local function trim(s)
 	return s:match("^%s*(.-)%s*$")
 end
 
 local function HTMLFormatToString(text)
 	text = text:gsub(">%s+<", "><")
+	text = text:gsub("&nbsp;", " ")
 
 	local brTag = "%s*<[Bb][Rr]%s*(/?)%s*>%s*"
 	local pattern2 = brTag .. brTag .. "(" .. brTag .. ")*"
@@ -65,22 +57,6 @@ end
 
 local toText = function(v)
     return v:text()
-end
-
-local function mapNotNull(o, f)
-    local result = {}
-    for i, v in ipairs(o) do
-        local mapped = f(v)
-        if mapped ~= nil then
-            table.insert(result, mapped)
-        end
-    end
-    return result
-end
-
-local function randomizedDelay()
-	---@diagnostic disable-next-line: undefined-global
-	delay(math.random(241, 653))
 end
 
 local function safeFetch(url)
@@ -162,15 +138,11 @@ local function parseNovel(novelURL, loadChapters)
 	local tags = map(document:select(".cont-in > div.cont-text.showcont-h"):select("a"), toText)
 	-- prettyPrint("Tags", table.concat(tags, ", "))
 
-	local chapterCount = tonumber(document:select("div.r-fullstory-spec > ul:first-of-type > li:nth-of-type(4) > span"):text():match("^(%d+)"))
-	-- prettyPrint("Chapter Count", chapterCount)
-
 	local commentCount = tonumber(document:select("div.r-fullstory-spec > ul:nth-child(3) > li > span > a"):text())
 	-- prettyPrint("Comment Count", commentCount)
 
 	local viewCount = tonumber((document:select("div.r-fullstory-spec > ul:nth-child(2) > li:nth-child(2) > span"):text():gsub(" ", "")))
 	-- prettyPrint("View Count", viewCount)
-
 
 	-- local chapterIndexUrl = expandURL(document:select(".uppercase.bold:nth-of-type(2)"):attr("href"))
 	-- prettyPrint("Chapter Index URL", chapterIndexUrl)
@@ -258,7 +230,7 @@ end
 
 return {
 	id = 96203,
-	name = "Ranobes",
+	name = "Ranobes (MTL)",
 	baseURL = baseURL,
 	imageURL = imageURL,
 	hasCloudFlare = true,
