@@ -194,7 +194,7 @@ local function parseNovel(novelURL, loadChapters)
 	local chapterCount
 	local liNodes = document:select("div.r-fullstory-spec > ul:first-of-type > li")
 	for i = 1, liNodes:size() do
-	  local li = liNodes:get(i - 1)  -- assuming a 0-indexed API
+	  local li = liNodes:get(i - 1)
 	  local text = li:text()
 	  if text:find("Available:") or text:find("Translated:") then
 		chapterCount = tonumber(text:match("(%d+)"))
@@ -233,7 +233,7 @@ local function parseNovel(novelURL, loadChapters)
 
 	if loadChapters then
 		local totalPages = math.ceil(chapterCount / 25)
-		prettyPrint("TOTAL PAGES", totalPages)
+		-- prettyPrint("TOTAL PAGES", totalPages)
 		local chapters = {}
 
 		if not fetchedPageCounters[novelURL] then
