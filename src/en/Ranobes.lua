@@ -27,6 +27,7 @@ end
 
 local function HTMLFormatToString(text)
 	text = text:gsub(">%s+<", "><")
+	text = text:gsub("&nbsp;", " ")
 
 	local brTag = "%s*<[Bb][Rr]%s*(/?)%s*>%s*"
 	local pattern2 = brTag .. brTag .. "(" .. brTag .. ")*"
@@ -73,31 +74,29 @@ local function fetchSafely(url, saveChapters)
 		local code = errMsg:match("(%d%d%d)")
 
 		if saveChapters then
-			return false
-		else 
-			if code == "429" then
-				error("Rate limit reached. Use WebView to unblock or try later.")
-			elseif code then
-				error("HTTP error: " .. code)
-			else
-				error("HTTP error detected. Can't fetch document:\n" .. errMsg)
-			end
+			return false, code or "unknown", errMsg
 		end
-	else
-		local titleTag = document:selectFirst("title")
-		if titleTag and titleTag:text() == "Error" then
-			-- prettyPrint("ERROR!", "CAN'T FETCH - CAPTCHA DETECTED!")
 
-			if saveChapters then
-				return false
-			else 
-				error("CAPTCHA detected. Use WebView to bypass.")
-			end
+		if code == "429" then
+			error("Rate limit reached. Use WebView to unblock or try later.")
+		elseif code then
+			error("HTTP error: " .. code)
 		else
-			return document
+			error("HTTP error detected:\n" .. errMsg)
 		end
 	end
+
+	local titleTag = document:selectFirst("title")
+	if titleTag and titleTag:text() == "Error" then
+		if saveChapters then
+			return false, "captcha", "CAPTCHA detected."
+		end
+		error("CAPTCHA detected. Use WebView to bypass.")
+	end
+
+	return document
 end
+
 
 local function getIndexData(indexDocument)
 	local data = tostring(indexDocument:select("main + script"))
@@ -146,7 +145,7 @@ local function parseChapters(indexDocument)
 		local chapterTitle = chapter.title
 		-- prettyPrint("CHAPTER TITLE", chapterTitle .. "\n" .. "LINK: " .. chapter.link)
 		return NovelChapter {
-			order = math.max(0, tonumber(chapterTitle:match(chapterPattern) or chapterTitle:match(episodePattern)) - 1),
+			order = tonumber(chapter.id) or 0,
 			title = chapter.title,
 			link = chapter.link,
 			release = chapter.showDate .. " • " .. chapter.date,
@@ -175,7 +174,12 @@ local function parseNovel(novelURL, loadChapters)
 	description = HTMLFormatToString(description)
 	-- prettyPrint("Description [AFTER]", description)
 
-	local status = document:selectFirst("div.r-fullstory-spec > ul > li:nth-of-type(2) > span > a"):text()
+	local status = document:selectFirst("div.r-fullstory-spec > ul > li:nth-of-type(2) > span > a")
+	if not status then
+		status = document:selectFirst("div.r-fullstory-spec > ul > li > span > a"):text()
+	else
+		status = status:text()
+	end
 	-- prettyPrint("Status", status)
 
 	local genres = map(document:select("#mc-fs-genre > div.links"):select("a"), toText)
@@ -187,7 +191,16 @@ local function parseNovel(novelURL, loadChapters)
 	local tags = map(document:select(".cont-in > div.cont-text.showcont-h"):select("a"), toText)
 	-- prettyPrint("Tags", table.concat(tags, ", "))
 
-	local chapterCount = tonumber(document:select("div.r-fullstory-spec > ul:first-of-type > li:nth-of-type(4) > span"):text():match("^(%d+)"))
+	local chapterCount
+	local liNodes = document:select("div.r-fullstory-spec > ul:first-of-type > li")
+	for i = 1, liNodes:size() do
+	  local li = liNodes:get(i - 1)
+	  local text = li:text()
+	  if text:find("Available:") or text:find("Translated:") then
+		chapterCount = tonumber(text:match("(%d+)"))
+		break
+	  end
+	end
 	-- prettyPrint("Chapter Count", chapterCount)
 
 	local commentCount = tonumber(document:select("div.r-fullstory-spec > ul:nth-child(3) > li > span > a"):text())
@@ -220,6 +233,7 @@ local function parseNovel(novelURL, loadChapters)
 
 	if loadChapters then
 		local totalPages = math.ceil(chapterCount / 25)
+		-- prettyPrint("TOTAL PAGES", totalPages)
 		local chapters = {}
 
 		if not fetchedPageCounters[novelURL] then
@@ -249,19 +263,22 @@ local function parseNovel(novelURL, loadChapters)
 		end
 
 		for i = remainingPages, 1, -1 do
-			local next = fetchSafely(chapterIndexUrl .. "page/" .. i, true)
-
+			local next, errType, errMsg = fetchSafely(chapterIndexUrl .. "page/" .. i, true)
+		
 			if next then
-				-- prettyPrint("NOTICE", "Attempting to parse nextChapters! page/" .. i)
 				local nextChapters = parseChapters(next)
 				chapters = concatLists(chapters, nextChapters)
-				counterData.fetchedCount  = counterData.fetchedCount  + 1
-				-- prettyPrint("CHAPTERS SAVED!", "SAVED PAGE COUNTER: " .. counterData.fetchedCount)
+				counterData.fetchedCount = counterData.fetchedCount + 1
 				randomizedDelay()
 			else
-				-- prettyPrint("UPDATE FAILED!", "Some chapters have been saved but some are remaining!" .. "\nSAVED PAGE COUNTER: " .. counterData.fetchedCount)
 				NovelInfo:setChapters(AsList(chapters))
-				error("CAPTCHA detected. Use WebView to bypass.")
+		
+				local errorMessages = {
+					["429"] = 'Rate limit reached. Enter "Chapter List" to bypass block or try later.',
+					["captcha"] = 'CAPTCHA detected. Enter "Chapter List" to bypass block using WebView.'
+				}
+		
+				error(errorMessages[errType] or ("HTTP error " .. errType .. ": " .. errMsg))
 			end
 		end
 
