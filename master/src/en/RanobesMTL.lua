@@ -19,15 +19,6 @@ local function prettyPrint(label, value)
     print(divider .. "\n")
 end
 
-local function concatTables(list1, list2)
-    for i = 1, #list2 do
-		if not list1[list2[i]] then
-			table.insert(list1, list2[i])
-		end
-    end
-    return list1
-end
-
 local function trim(s)
 	return s:match("^%s*(.-)%s*$")
 end
@@ -66,22 +57,6 @@ end
 
 local toText = function(v)
     return v:text()
-end
-
-local function mapNotNull(o, f)
-    local result = {}
-    for i, v in ipairs(o) do
-        local mapped = f(v)
-        if mapped ~= nil then
-            table.insert(result, mapped)
-        end
-    end
-    return result
-end
-
-local function randomizedDelay()
-	---@diagnostic disable-next-line: undefined-global
-	delay(math.random(241, 653))
 end
 
 local function safeFetch(url)
