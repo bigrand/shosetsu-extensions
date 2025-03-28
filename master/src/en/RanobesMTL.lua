@@ -19,6 +19,18 @@ local function prettyPrint(label, value)
     print(divider .. "\n")
 end
 
+local consecutiveTriggers = 0
+local function randomizedDelay()
+    consecutiveTriggers = consecutiveTriggers + 1
+    local delayTime
+    if consecutiveTriggers <= 2 then
+        delayTime = math.random(500, 1000)
+    else
+        delayTime = math.random(3000, 4000)
+    end
+    delay(delayTime)
+end
+
 local function trim(s)
 	return s:match("^%s*(.-)%s*$")
 end
@@ -80,25 +92,36 @@ local function safeFetch(url)
 	return document
 end
 
-local function parseListing(url, data)
+local function parseListing(data, isSearch)
     local page = data[PAGE]
-	local document = safeFetch(url .. "page/" .. page)
-	local pageNovels = document:selectFirst("#dle-content")
-	prettyPrint("CURRENT PAGE", page)
-	return map(pageNovels:select("article.block.story.shortstory.mod-poster"), function(v)
-		local title = v:selectFirst(".title"):text()
-		local link = v:selectFirst("h2 > a"):attr("href")
-		local figure = v:selectFirst(".cover")
-		local imgURL = figure and figure:attr("style"):match("url%((.-)%)")
+    local url
 
-		---@diagnostic disable-next-line: deprecated, missing-fields
-		return Novel({
-			title = title,
-			link = shrinkURL(link),
-			imageURL = imgURL,
-		})
-	end)
+    if isSearch then
+        local queryContent = data[QUERY]
+        prettyPrint("CURRENT PAGE (SEARCH)", page)
+        url = baseURL .. "/f/g.mtl_files=1/l.title=" .. queryContent .. "/sort=date/order=desc/page/" .. page
+    else
+        prettyPrint("CURRENT PAGE", page)
+        url = baseURL .. "/f/g.mtl_files=1/sort=date/order=desc/page/" .. page
+    end
+
+	randomizedDelay()
+    local document = GETDocument(url)
+    local pageNovels = document:selectFirst("#dle-content")
+    return map(pageNovels:select("article.block.story.shortstory.mod-poster"), function(v)
+        local title = v:selectFirst(".title"):text()
+        local link = v:selectFirst("h2 > a"):attr("href")
+        local figure = v:selectFirst(".cover")
+        local imgURL = figure and figure:attr("style"):match("url%((.-)%)")
+        
+        return Novel({
+            title = title,
+            link = shrinkURL(link),
+            imageURL = imgURL,
+        })
+    end)
 end
+
 
 local function parseNovel(novelURL, loadChapters)
 	local url = expandURL(novelURL)
@@ -205,29 +228,6 @@ local function getPassage(chapterURL)
 	return pageOfElem(chapter, false)
 end
 
-local function search(data)
-	local queryContent = data[QUERY]
-    local page = data[PAGE]
-	local document = safeFetch(baseURL .. "/f/g.mtl_files=1/l.title=" .. queryContent .. "/sort=date/order=desc/page/" .. page)
-	local pageNovels = document:selectFirst("#dle-content")
-
-	prettyPrint("CURRENT PAGE SEARCH", page)
-
-	return map(pageNovels:select("article.block.story.shortstory.mod-poster"), function(v)
-		local title = v:selectFirst(".title"):text()
-		local link = v:selectFirst("h2 > a"):attr("href")
-		local figure = v:selectFirst(".cover")
-		local imgURL = figure and figure:attr("style"):match("url%((.-)%)")
-
-		---@diagnostic disable-next-line: deprecated, missing-fields
-		return Novel({
-			title = title,
-			link = shrinkURL(link),
-			imageURL = imgURL,
-		})
-	end)
-end
-
 return {
 	id = 96203,
 	name = "Ranobes (MTL)",
@@ -239,7 +239,7 @@ return {
 
 	listings = {
 		Listing("Popular", true, function(data)
-			return parseListing(expandURL("/f/g.mtl_files=1/sort=date/order=desc/"), data)
+			return parseListing(data, false)
 		end),
 	},
 
@@ -247,5 +247,7 @@ return {
 	expandURL = expandURL,
 	getPassage = getPassage,
 	parseNovel = parseNovel,
-	search = search,
+	search = function(data)
+		return parseListing(data, true)
+	end,
 }
