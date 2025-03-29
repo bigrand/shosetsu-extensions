@@ -10,9 +10,9 @@ local function randomizedDelay()
     consecutiveTriggers = consecutiveTriggers + 1
     local delayTime
     if consecutiveTriggers <= 2 then
-        delayTime = math.random(500, 1500)
+		delayTime = math.random(1000, 2000)
     else
-        delayTime = math.random(1500, 3000)
+		delayTime = math.random(3000, 4000)
     end
     delay(delayTime)
 end
@@ -118,7 +118,7 @@ end
 local function parseNovel(novelURL, loadChapters)
 	local url = expandURL(novelURL)
 	local document = safeFetch(url)
-	
+
 	if not document then
 		error("Error: Failed to fetch novel.")
 	end

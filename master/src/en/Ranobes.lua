@@ -61,9 +61,9 @@ local function randomizedDelay(isSearch)
 	if isSearch then
 		consecutiveTriggers = consecutiveTriggers + 1
 		if consecutiveTriggers <= 2 then
-			delayTime = math.random(500, 1500)
+			delayTime = math.random(1000, 2000)
 		else
-			delayTime = math.random(1500, 3000)
+			delayTime = math.random(3000, 4000)
 		end
 	else
 		delayTime = math.random(2000, 3000)
