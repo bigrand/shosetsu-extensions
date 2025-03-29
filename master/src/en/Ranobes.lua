@@ -1,4 +1,4 @@
--- {"id":96201,"ver":"1.0.2","libVer":"1.0.0","author":"bigrand","dep":["dkjson"]}
+-- {"id":96201,"ver":"1.0.4","libVer":"1.0.0","author":"bigrand","dep":["dkjson"]}
 
 local baseURL = "https://ranobes.top"
 local imageURL = "https://github.com/bigrand/shosetsu-extensions/raw/master/icons/ranobes.png"
@@ -6,13 +6,6 @@ local imageURL = "https://github.com/bigrand/shosetsu-extensions/raw/master/icon
 local json = Require("dkjson")
 
 local fetchedPageCounters = {}
-
-local function prettyPrint(label, value)
-    print("\n==============================================")
-    print(">> " .. label .. ":")
-    print(tostring(value))
-    print("==============================================\n")
-end
 
 local function concatLists(list1, list2)
     for i = 1, #list2 do
@@ -61,12 +54,25 @@ local toText = function(v)
     return v:text()
 end
 
-local function randomizedDelay()
-	---@diagnostic disable-next-line: undefined-global
-	delay(math.random(4000, 6000))
+local consecutiveTriggers = 0
+local function randomizedDelay(isSearch)
+	local delayTime
+
+	if isSearch then
+		consecutiveTriggers = consecutiveTriggers + 1
+		if consecutiveTriggers <= 2 then
+			delayTime = math.random(500, 1500)
+		else
+			delayTime = math.random(1500, 3000)
+		end
+	else
+		delayTime = math.random(2000, 3000)
+	end
+
+	delay(delayTime)
 end
 
-local function fetchSafely(url, saveChapters)
+local function safeFetch(url, saveChapters)
 	local ok, document = pcall(GETDocument, url)
 
 	if not ok then
@@ -78,25 +84,23 @@ local function fetchSafely(url, saveChapters)
 		end
 
 		if code == "429" then
-			error("Rate limit reached. Use WebView to unblock or try later.")
-		elseif code then
-			error("HTTP error: " .. code)
+			error("Rate limit reached. Try again later.")
 		else
-			error("HTTP error detected:\n" .. errMsg)
+			error("HTTP error: " .. (code or errMsg))
 		end
 	end
 
-	local titleTag = document:selectFirst("title")
-	if titleTag and titleTag:text() == "Error" then
+	local title = document:selectFirst("title"):text()
+	if title == "Error" or title == "Ranobes Flood Guard" then
 		if saveChapters then
 			return false, "captcha", "CAPTCHA detected."
 		end
-		error("CAPTCHA detected. Use WebView to bypass.")
+
+		error("CAPTCHA detected. Use WebView to bypass. (or a Browser)")
 	end
 
 	return document
 end
-
 
 local function getIndexData(indexDocument)
 	local data = tostring(indexDocument:select("main + script"))
@@ -104,19 +108,24 @@ local function getIndexData(indexDocument)
 	:gsub("</script>", "")
 	:gsub("window.__DATA__ = ", "")
 
-	--prettyPrint("String Data", data)
 	local obj, pos, err = json.decode(data)
 
 	if err then
 		error("JSON Decode Error: " .. err)
 	else
 		local jsonData = json.encode(obj, { indent = true })
-		--prettyPrint("JSON Data", jsonData)
 		return obj
 	end
 end
 
-local function parseListing(document)
+local function parseListing(url)
+	randomizedDelay(true)
+	local document = safeFetch(url)
+
+	if not document then
+		error("Error: Failed to fetch listing.")
+	end
+
 	return map(document:select(".rank-story"), function(v)
 		local title = v:selectFirst("h2 a")
 		local figure = v:selectFirst("figure")
@@ -124,7 +133,6 @@ local function parseListing(document)
 		local img = figure and figure:selectFirst("img")
 		local imgURL = expandURL(img:attr("src"))
 
-		---@diagnostic disable-next-line: deprecated, missing-fields
 		return Novel({
 			title = title:text(),
 			link = shrinkURL(title:attr("href")),
@@ -136,16 +144,12 @@ end
 local function parseChapters(indexDocument)
 	local indexData = getIndexData(indexDocument)
 
-	local chapterPattern = "[Cc][Hh][Aa][Pp]%a*%.?[%s%-:]+([0-9]+%.?[0-9]*)"
-  	local episodePattern = "[Ee][Pp]%a*%.?[%s%-:]+([0-9]+%.?[0-9]*)"
-
-	-- prettyPrint("CHAPTERS", "RETRIEVED CORRECTLY!")
-
 	return map(indexData.chapters, function(chapter)
-		local chapterTitle = chapter.title
-		-- prettyPrint("CHAPTER TITLE", chapterTitle .. "\n" .. "LINK: " .. chapter.link)
+		local dateNumber = chapter.date:gsub("%D", "")
+		local orderNumber = tonumber(dateNumber .. chapter.id) or 0
+
 		return NovelChapter {
-			order = tonumber(chapter.id) or 0,
+			order = orderNumber,
 			title = chapter.title,
 			link = chapter.link,
 			release = chapter.showDate .. " • " .. chapter.date,
@@ -154,25 +158,20 @@ local function parseChapters(indexDocument)
 	end)
 end
 
+
 local function parseNovel(novelURL, loadChapters)
 	local url = expandURL(novelURL)
-	-- prettyPrint("URL", url)
-	local document = fetchSafely(url)
-	assert(document, "Document should not be nil.")
+	local document = safeFetch(url)
+
+	if not document then
+		error("Error: Failed to fetch novel.")
+	end
 
 	local title = document:selectFirst('meta[property="og:title"]'):attr("content")
-	-- prettyPrint("Title", title)
-
 	local altTitle = document:selectFirst("h1.title > span.subtitle"):text()
-	-- prettyPrint("Alternate Title", altTitle)
-
 	local imgURL = document:selectFirst("a.highslide"):attr("href")
-	-- prettyPrint("Image URL", imgURL)
-
 	local description = tostring(document:selectFirst(".moreless.cont-text.showcont-h"))
-	-- prettyPrint("Description [BEFORE]", description)
 	description = HTMLFormatToString(description)
-	-- prettyPrint("Description [AFTER]", description)
 
 	local status = document:selectFirst("div.r-fullstory-spec > ul > li:nth-of-type(2) > span > a")
 	if not status then
@@ -180,39 +179,26 @@ local function parseNovel(novelURL, loadChapters)
 	else
 		status = status:text()
 	end
-	-- prettyPrint("Status", status)
 
 	local genres = map(document:select("#mc-fs-genre > div.links"):select("a"), toText)
-	-- prettyPrint("Genres", table.concat(genres, ", "))
-
 	local authors = map(document:select(".tag_list"):select("a"), toText)
-	-- prettyPrint("Authors", table.concat(authors, ", "))
-
 	local tags = map(document:select(".cont-in > div.cont-text.showcont-h"):select("a"), toText)
-	-- prettyPrint("Tags", table.concat(tags, ", "))
 
 	local chapterCount
 	local liNodes = document:select("div.r-fullstory-spec > ul:first-of-type > li")
 	for i = 1, liNodes:size() do
-	  local li = liNodes:get(i - 1)
-	  local text = li:text()
-	  if text:find("Available:") or text:find("Translated:") then
-		chapterCount = tonumber(text:match("(%d+)"))
-		break
-	  end
+		local li = liNodes:get(i - 1)
+		local text = li:text()
+		if text:find("Available:") or text:find("Translated:") then
+			chapterCount = tonumber(text:match("(%d+)"))
+			break
+		end
 	end
-	-- prettyPrint("Chapter Count", chapterCount)
 
 	local commentCount = tonumber(document:select("div.r-fullstory-spec > ul:nth-child(3) > li > span > a"):text())
-	-- prettyPrint("Comment Count", commentCount)
-
 	local viewCount = tonumber((document:select("div.r-fullstory-spec > ul:nth-child(2) > li:nth-child(2) > span"):text():gsub(" ", "")))
-	-- prettyPrint("View Count", viewCount)
-
 	local chapterIndexUrl = expandURL(document:select(".uppercase.bold:nth-of-type(2)"):attr("href"))
-	-- prettyPrint("Chapter Index URL", chapterIndexUrl)
 
-	---@diagnostic disable-next-line: missing-fields
 	local NovelInfo = NovelInfo {
 		title = title,
 		alternativeTitles = { altTitle },
@@ -222,7 +208,10 @@ local function parseNovel(novelURL, loadChapters)
 		description = description,
 		status = ({
 			Active = NovelStatus.PUBLISHING,
+			Ongoing = NovelStatus.PUBLISHING,
 			Completed = NovelStatus.COMPLETED,
+			Break = NovelStatus.PAUSED,
+			Hiatus = NovelStatus.PAUSED
 		})[status] or NovelStatus.UNKNOWN,
 		tags = tags,
 		genres = genres,
@@ -233,7 +222,6 @@ local function parseNovel(novelURL, loadChapters)
 
 	if loadChapters then
 		local totalPages = math.ceil(chapterCount / 25)
-		-- prettyPrint("TOTAL PAGES", totalPages)
 		local chapters = {}
 
 		if not fetchedPageCounters[novelURL] then
@@ -242,43 +230,27 @@ local function parseNovel(novelURL, loadChapters)
 
 		local counterData = fetchedPageCounters[novelURL]
 
-		-- prettyPrint("FETCHED PAGE COUNTER", counterData.fetchedCount)
-
 		if counterData.fetchedCount == 0 then
-			local lastIndexDocument = fetchSafely(chapterIndexUrl .. "page/" .. totalPages, true)
-
-			-- prettyPrint("NOTICE", "Attempting to parse lastIndexDocument chapters!")
+			local lastIndexDocument = safeFetch(chapterIndexUrl .. "page/" .. totalPages, true)
 			local lastIndexChapters = parseChapters(lastIndexDocument)
 
 			chapters = concatLists(chapters, lastIndexChapters)
 			counterData.fetchedCount  = counterData.fetchedCount  + 1
-			-- prettyPrint("SAVED PAGE COUNTER", counterData.fetchedCount)
 		end
 
 		local remainingPages = totalPages - counterData.fetchedCount
 
-		if remainingPages < 1 then
-			counterData.fetchedCount = counterData.fetchedCount - 1
-			remainingPages = 1
-		end
-
 		for i = remainingPages, 1, -1 do
-			local next, errType, errMsg = fetchSafely(chapterIndexUrl .. "page/" .. i, true)
-		
+			randomizedDelay()
+			local next, errType, errMsg = safeFetch(chapterIndexUrl .. "page/" .. i, true)
+
 			if next then
 				local nextChapters = parseChapters(next)
 				chapters = concatLists(chapters, nextChapters)
 				counterData.fetchedCount = counterData.fetchedCount + 1
-				randomizedDelay()
 			else
 				NovelInfo:setChapters(AsList(chapters))
-		
-				local errorMessages = {
-					["429"] = 'Rate limit reached. Enter "Chapter List" to bypass block or try later.',
-					["captcha"] = 'CAPTCHA detected. Enter "Chapter List" to bypass block using WebView.'
-				}
-		
-				error(errorMessages[errType] or ("HTTP error " .. errType .. ": " .. errMsg))
+				break
 			end
 		end
 
@@ -289,8 +261,12 @@ local function parseNovel(novelURL, loadChapters)
 end
 
 local function getPassage(chapterURL)
-	-- prettyPrint("TRYING TO FETCH CHAPTER - URL", chapterURL)
-	local document = GETDocument(chapterURL)
+	local document = safeFetch(chapterURL)
+
+	if not document then
+		error("Error: Failed to fetch passage.")
+	end
+
 	local title = document:selectFirst("#dle-speedbar > span"):text()
 	local chapter = document:selectFirst("#arrticle.text")
 
@@ -302,14 +278,14 @@ end
 local function search(data)
 	local queryContent = data[QUERY]
     local page = data[PAGE]
+
+	randomizedDelay(true)
 	local document = GETDocument(baseURL .. "/search/" .. queryContent .. "/page/" .. page)
 
     return map(document:select(".shortstory"), function(v)
 		local title = v:selectFirst("h2 a"):text()
 		local link = shrinkURL(v:selectFirst("h2 a"):attr("href"))
 		local imgURl = v:selectFirst("figure"):attr("style"):match("url%((.-)%)")
-		
-		-- prettyPrint("NOVEL FOUND!", "Title: " .. title .. "\n" .. "imgURL: " .. imgURl .. "\n" .. "Link: " .. link)
 
 		return Novel({
 			title = title,
@@ -330,7 +306,7 @@ return {
 
 	listings = {
 		Listing("Popular", false, function()
-			return parseListing(fetchSafely(expandURL("/ranking/")))
+			return parseListing(expandURL("/ranking/"))
 		end),
 	},
 

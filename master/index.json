@@ -8,7 +8,7 @@
 			"fileName": "Ranobes",
 			"imageURL": "https://github.com/bigrand/shosetsu-extensions/raw/master/icons/ranobes.png",
 			"lang": "en",
-			"ver": "1.0.3",
+			"ver": "1.0.4",
 			"libVer": "1.0.0",
 			"md5": "",
 			"type": "LuaScript"
@@ -19,7 +19,7 @@
 			"fileName": "RanobesMTL",
 			"imageURL": "https://github.com/bigrand/shosetsu-extensions/raw/master/icons/ranobesmtl.png",
 			"lang": "en",
-			"ver": "1.0.2",
+			"ver": "1.0.3",
 			"libVer": "1.0.0",
 			"md5": "",
 			"type": "LuaScript"
