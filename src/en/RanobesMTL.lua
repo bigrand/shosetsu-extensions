@@ -1,32 +1,18 @@
--- {"id":96203,"ver":"1.0.2","libVer":"1.0.0","author":"bigrand","dep":["dkjson"]}
+-- {"id":96203,"ver":"1.0.3","libVer":"1.0.0","author":"bigrand","dep":["dkjson"]}
 
 local baseURL = "https://ranobes.top"
 local imageURL = "https://github.com/bigrand/shosetsu-extensions/raw/master/icons/ranobes.png"
 
 local json = Require("dkjson")
 
-local function prettyPrint(label, value)
-    local divider = string.rep("=", 46)
-    print("\n" .. divider)
-    print(">> " .. label .. ":")
-
-    if type(value) == "table" then
-        print(json.encode(value, { indent = true }))
-    else
-        print(tostring(value))
-    end
-
-    print(divider .. "\n")
-end
-
 local consecutiveTriggers = 0
 local function randomizedDelay()
     consecutiveTriggers = consecutiveTriggers + 1
     local delayTime
     if consecutiveTriggers <= 2 then
-        delayTime = math.random(500, 1000)
+		delayTime = math.random(1000, 2000)
     else
-        delayTime = math.random(3000, 4000)
+		delayTime = math.random(3000, 4000)
     end
     delay(delayTime)
 end
@@ -35,7 +21,7 @@ local function trim(s)
 	return s:match("^%s*(.-)%s*$")
 end
 
-local function HTMLFormatToString(text)
+local function HTMLToString(text)
 	text = text:gsub(">%s+<", "><")
 	text = text:gsub("&nbsp;", " ")
 
@@ -71,11 +57,16 @@ local toText = function(v)
     return v:text()
 end
 
-local function safeFetch(url)
+local function safeFetch(url, saveChapters)
 	local ok, document = pcall(GETDocument, url)
+
 	if not ok then
 		local errMsg = tostring(document)
 		local code = errMsg:match("(%d%d%d)")
+
+		if saveChapters then
+			return false, code or "unknown", errMsg
+		end
 
 		if code == "429" then
 			error("Rate limit reached. Try again later.")
@@ -86,6 +77,10 @@ local function safeFetch(url)
 
 	local title = document:selectFirst("title"):text()
 	if title == "Error" or title == "Ranobes Flood Guard" then
+		if saveChapters then
+			return false, "captcha", "CAPTCHA detected."
+		end
+
 		error("CAPTCHA detected. Use WebView to bypass. (or a Browser)")
 	end
 
@@ -98,10 +93,8 @@ local function parseListing(data, isSearch)
 
     if isSearch then
         local queryContent = data[QUERY]
-        prettyPrint("CURRENT PAGE (SEARCH)", page)
         url = baseURL .. "/f/g.mtl_files=1/l.title=" .. queryContent .. "/sort=date/order=desc/page/" .. page
     else
-        prettyPrint("CURRENT PAGE", page)
         url = baseURL .. "/f/g.mtl_files=1/sort=date/order=desc/page/" .. page
     end
 
@@ -122,27 +115,19 @@ local function parseListing(data, isSearch)
     end)
 end
 
-
 local function parseNovel(novelURL, loadChapters)
 	local url = expandURL(novelURL)
-	prettyPrint("URL", url)
 	local document = safeFetch(url)
-	assert(document, "parseNovel: Document should not be nil.")
-	-- prettyPrint("DOCUMENT", document)
 
+	if not document then
+		error("Error: Failed to fetch novel.")
+	end
 	local title = document:selectFirst('meta[property="og:title"]'):attr("content")
-	-- prettyPrint("Title", title)
-
 	local altTitle = document:selectFirst("h1.title > span.subtitle"):text()
-	-- prettyPrint("Alternate Title", altTitle)
-
 	local imgURL = document:selectFirst("a.highslide"):attr("href")
-	-- prettyPrint("Image URL", imgURL)
 
 	local description = tostring(document:selectFirst(".moreless.cont-text.showcont-h"))
-	-- prettyPrint("Description [BEFORE]", description)
-	description = HTMLFormatToString(description)
-	-- prettyPrint("Description [AFTER]", description)
+	description = HTMLToString(description)
 
 	local status = document:selectFirst("div.r-fullstory-spec > ul > li:nth-of-type(2) > span > a")
 	if not status then
@@ -150,32 +135,15 @@ local function parseNovel(novelURL, loadChapters)
 	else
 		status = status:text()
 	end
-	-- prettyPrint("Status", status)
 
 	local genres = map(document:select("#mc-fs-genre > div.links"):select("a"), toText)
-	-- prettyPrint("Genres", table.concat(genres, ", "))
-
 	local authors = map(document:select(".tag_list"):select("a"), toText)
-	-- prettyPrint("Authors", table.concat(authors, ", "))
-
 	local tags = map(document:select(".cont-in > div.cont-text.showcont-h"):select("a"), toText)
-	-- prettyPrint("Tags", table.concat(tags, ", "))
-
 	local commentCount = tonumber(document:select("div.r-fullstory-spec > ul:nth-child(3) > li > span > a"):text())
-	-- prettyPrint("Comment Count", commentCount)
-
 	local viewCount = tonumber((document:select("div.r-fullstory-spec > ul:nth-child(2) > li:nth-child(2) > span"):text():gsub(" ", "")))
-	-- prettyPrint("View Count", viewCount)
-
-	-- local chapterIndexUrl = expandURL(document:select(".uppercase.bold:nth-of-type(2)"):attr("href"))
-	-- prettyPrint("Chapter Index URL", chapterIndexUrl)
-
 	local novelID = tonumber(document:selectFirst('meta[property="og:url"]'):attr("content"):match("/novels/(%d+)-"))
-	prettyPrint("NovelID", novelID)
-
 	local mtlURL = "https://ranobes.top/mtl-reader/" .. novelID .. "/index/"
 
-	---@diagnostic disable-next-line: missing-fields
 	local NovelInfo = NovelInfo {
 		title = title,
 		alternativeTitles = { altTitle },
@@ -221,7 +189,6 @@ local function parseNovel(novelURL, loadChapters)
 end
 
 local function getPassage(chapterURL)
-	-- prettyPrint("TRYING TO FETCH CHAPTER - URL", chapterURL)
 	local document = safeFetch(chapterURL)
 	local chapter = document:selectFirst("#arrticle.text")
 
