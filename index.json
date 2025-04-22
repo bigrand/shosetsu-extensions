@@ -8,13 +8,6 @@
       "website": ""
     },
     {
-      "id": -2017179821,
-      "name": "Doomsdayrs",
-      "desc": "Worked on NovelFull, SyosetsuB",
-      "imageURL": "",
-      "website": ""
-    },
-    {
       "id": -114276059,
       "name": "bigrand",
       "desc": "Worked on Ranobes, Ranobes (MTL)",
@@ -25,6 +18,13 @@
       "id": 1379167306,
       "name": "David Kolf",
       "desc": "Worked on dkjson",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": -2017179821,
+      "name": "Doomsdayrs",
+      "desc": "Worked on NovelFull",
       "imageURL": "",
       "website": ""
     },
@@ -120,17 +120,6 @@
       "ver": "1.0.3",
       "libVer": "1.0.0",
       "md5": "0ce8dc254c1d15186838f6b7a6f3b7ab698c6a11fc141a17e7813fd685029645",
-      "type": "LuaScript"
-    },
-    {
-      "id": 42042069,
-      "name": "SyosetsuB",
-      "fileName": "SyosetsuB",
-      "imageURL": "https://github.com/shosetsuorg/extensions/raw/dev/icons/Syosetsu.png",
-      "lang": "ja",
-      "ver": "1.2.5",
-      "libVer": "1.0.0",
-      "md5": "8428c846cf32d100f6ce69bb4755fed21b7af531470c69ebc1cac071d2cb0604",
       "type": "LuaScript"
     }
   ],
