@@ -1,28 +1,139 @@
-
 {
-	"libraries": [],
-	"scripts": [
-		{
-			"id": 96201,
-			"name": "(Ranobes)",
-			"fileName": "Ranobes",
-			"imageURL": "https://github.com/bigrand/shosetsu-extensions/raw/master/icons/ranobes.png",
-			"lang": "en",
-			"ver": "1.0.4",
-			"libVer": "1.0.0",
-			"md5": "",
-			"type": "LuaScript"
-		},
-		{
-			"id": 96203,
-			"name": "Ranobes (MTL)",
-			"fileName": "RanobesMTL",
-			"imageURL": "https://github.com/bigrand/shosetsu-extensions/raw/master/icons/ranobesmtl.png",
-			"lang": "en",
-			"ver": "1.0.3",
-			"libVer": "1.0.0",
-			"md5": "",
-			"type": "LuaScript"
-		}
-	]
+  "authors": [
+    {
+      "id": -821183208,
+      "name": "TechnoJo4",
+      "desc": "Worked on 247truyen, CommonCSS, Madara, NovelFull, WWVolare, url",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": -2017179821,
+      "name": "Doomsdayrs",
+      "desc": "Worked on NovelFull, SyosetsuB",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": -114276059,
+      "name": "bigrand",
+      "desc": "Worked on Ranobes, Ranobes (MTL)",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": 1379167306,
+      "name": "David Kolf",
+      "desc": "Worked on dkjson",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": -931466336,
+      "name": "JFronny",
+      "desc": "Worked on XenForo",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": -228911304,
+      "name": "Stepets",
+      "desc": "Worked on utf8",
+      "imageURL": "",
+      "website": ""
+    }
+  ],
+  "libraries": [
+    {
+      "name": "247truyen",
+      "ver": "1.1.2",
+      "url": null,
+      "hash": "5497988eb28d103e8f992981e3c6ee369d6d1a8171d3719c0361d8130fd9b860"
+    },
+    {
+      "name": "CommonCSS",
+      "ver": "1.0.1",
+      "url": null,
+      "hash": "eb398cff152cf1ff1a7ca7ad415f55bf55aca0acefafb5363982e083de18a67d"
+    },
+    {
+      "name": "Madara",
+      "ver": "2.9.1",
+      "url": null,
+      "hash": "ed160e1ab15729bd19f26fdff7acbcac27d2d7be7727441f059ff893db549357"
+    },
+    {
+      "name": "NovelFull",
+      "ver": "2.0.6",
+      "url": null,
+      "hash": "84f4fd7edfd462ff7bea853a139eb0312767de0e83fca4e68bbdb98a0b052b38"
+    },
+    {
+      "name": "WWVolare",
+      "ver": "1.2.2",
+      "url": null,
+      "hash": "ae65d57adca4d64e2e1b713db84524e70b47b941d7cc58701aa8c665303bc024"
+    },
+    {
+      "name": "XenForo",
+      "ver": "1.0.5",
+      "url": null,
+      "hash": "99e92b56c773f2c567384bbb60962b612634915f328577953193cc70cc6e31c1"
+    },
+    {
+      "name": "dkjson",
+      "ver": "1.0.1",
+      "url": null,
+      "hash": "97803cfe54b21695dda1e8f8a37c5933c4dc7691e5df17c2c1df6cef1203c259"
+    },
+    {
+      "name": "url",
+      "ver": "1.0.0",
+      "url": null,
+      "hash": "f34c81389a1f13b2f6c9caac7b3c098708cab8b4de27f8081812a65ead7bc51a"
+    },
+    {
+      "name": "utf8",
+      "ver": "1.0.0",
+      "url": null,
+      "hash": "385ac1f729ae11ec9ea60089d275e6d937857a0ee2a09291c5ce187e86966180"
+    }
+  ],
+  "scripts": [
+    {
+      "id": 96201,
+      "name": "Ranobes",
+      "fileName": "Ranobes",
+      "imageURL": "https://github.com/bigrand/shosetsu-extensions/raw/master/icons/ranobes.png",
+      "lang": "en",
+      "ver": "1.0.4",
+      "libVer": "1.0.0",
+      "md5": "862a51c3afb845804c6c6abbc5c640aa26a85cae9424a7d4c0a380b5013d85d8",
+      "type": "LuaScript"
+    },
+    {
+      "id": 96203,
+      "name": "Ranobes (MTL)",
+      "fileName": "RanobesMTL",
+      "imageURL": "https://github.com/bigrand/shosetsu-extensions/raw/master/icons/ranobes.png",
+      "lang": "en",
+      "ver": "1.0.3",
+      "libVer": "1.0.0",
+      "md5": "0ce8dc254c1d15186838f6b7a6f3b7ab698c6a11fc141a17e7813fd685029645",
+      "type": "LuaScript"
+    },
+    {
+      "id": 42042069,
+      "name": "SyosetsuB",
+      "fileName": "SyosetsuB",
+      "imageURL": "https://github.com/shosetsuorg/extensions/raw/dev/icons/Syosetsu.png",
+      "lang": "ja",
+      "ver": "1.2.5",
+      "libVer": "1.0.0",
+      "md5": "8428c846cf32d100f6ce69bb4755fed21b7af531470c69ebc1cac071d2cb0604",
+      "type": "LuaScript"
+    }
+  ],
+  "styles": [],
+  "js": []
 }
