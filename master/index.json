@@ -15,14 +15,7 @@
       "website": ""
     }
   ],
-  "libraries": [
-    {
-      "name": "dkjson",
-      "ver": "1.0.1",
-      "url": null,
-      "hash": "97803cfe54b21695dda1e8f8a37c5933c4dc7691e5df17c2c1df6cef1203c259"
-    }
-  ],
+  "libraries": [],
   "scripts": [
     {
       "id": 96201,
