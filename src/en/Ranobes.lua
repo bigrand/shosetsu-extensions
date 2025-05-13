@@ -297,7 +297,7 @@ end
 
 return {
 	id = 96201,
-	name = "Ranobes",
+	name = "Ranobes (TOP)",
 	baseURL = baseURL,
 	imageURL = imageURL,
 	hasCloudFlare = true,
